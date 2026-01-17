@@ -1,6 +1,7 @@
 import streamlit as st
 import gspread
 from google.oauth2.service_account import Credentials
+from streamlit_autorefresh import st_autorefresh
 import pandas as pd
 import json
 import tempfile
@@ -25,8 +26,11 @@ gc = gspread.authorize(creds)
 sheet_id = "1meqhq0cp-n46Iq0T2RFIEc6eiJ3QZlfigBDnm477qGI"
 sh = gc.open_by_key(sheet_id)
 
-worksheet = sh.sheet1
-data = pd.DataFrame(worksheet.get_all_records())
+@st.cache_data(ttl=30)  # cada 30 segundos vuelve a cargar
+def cargar_datos():
+    worksheet = sh.sheet1
+    return pd.DataFrame(worksheet.get_all_records())
 
+data = cargar_datos()
 st.dataframe(data)
 
